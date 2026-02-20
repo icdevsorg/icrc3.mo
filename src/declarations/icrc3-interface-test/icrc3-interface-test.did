@@ -1,0 +1,214 @@
+type Value__1 = 
+ variant {
+   Array: vec Value__1;
+   Blob: blob;
+   Int: int;
+   Map: Map;
+   Nat: nat;
+   Nat64: nat64;
+   Text: text;
+ };
+type Value = 
+ variant {
+   Array: vec Value;
+   Blob: blob;
+   Int: int;
+   Map: vec record {
+              text;
+              Value;
+            };
+   Nat: nat;
+   Text: text;
+ };
+type Transfer = 
+ record {
+   amount: nat;
+   created_at_time: opt nat64;
+   fee: opt nat;
+   from: Account;
+   memo: opt blob;
+   spender: opt Account;
+   to: Account;
+ };
+type TransactionRange = 
+ record {
+   length: nat;
+   start: nat;
+ };
+type Transaction = 
+ record {
+   approve: opt Approve;
+   burn: opt Burn;
+   kind: text;
+   mint: opt Mint;
+   timestamp: nat64;
+   transfer: opt Transfer;
+ };
+type Tip = 
+ record {
+   hash_tree: blob;
+   last_block_hash: blob;
+   last_block_index: blob;
+ };
+type RosettaGetBlocksResponse = 
+ record {
+   archived_blocks: vec RosettaArchivedRange;
+   blocks: vec Value__1;
+   certificate: opt blob;
+   chain_length: nat64;
+   first_index: nat;
+ };
+type RosettaBlockRange = record {blocks: vec Value__1;};
+type RosettaArchivedRange = 
+ record {
+   callback: func (GetBlocksRequest) -> (RosettaBlockRange) query;
+   length: nat;
+   start: nat;
+ };
+type Mint = 
+ record {
+   amount: nat;
+   created_at_time: opt nat64;
+   memo: opt blob;
+   to: Account;
+ };
+type Map = 
+ vec record {
+       text;
+       Value__1;
+     };
+type LegacyArchivedRange = 
+ record {
+   callback: GetLegacyArchiveTransactionFunction;
+   length: nat;
+   start: nat;
+ };
+type InterfaceTestToken = 
+ service {
+   archives: () ->
+    (vec
+      record {
+        block_range_end: nat;
+        block_range_start: nat;
+        canister_id: principal;
+      });
+   enableMockGetBlocksHook: () -> ();
+   get_blocks: (legacyArgs: record {
+                              length: nat;
+                              start: nat;
+                            }) -> (RosettaGetBlocksResponse) query;
+   get_tip: () -> (Tip) query;
+   get_transactions: (txnArgs: record {
+                                 length: nat;
+                                 start: nat;
+                               }) -> (GetTransactionsResponse) query;
+   icrc3_get_archives: (getArchivesArgs: GetArchivesArgs) ->
+    (GetArchivesResult) query;
+   icrc3_get_blocks: (getBlocksArgs: GetBlocksArgs) ->
+    (GetBlocksResult) query;
+   icrc3_get_tip_certificate: () -> (opt DataCertificate) query;
+   icrc3_supported_block_types: () -> (vec BlockType) query;
+   removeAllHooks: () -> ();
+ };
+type InitArgs = 
+ record {
+   archiveControllers: opt opt vec principal;
+   archiveCycles: nat;
+   archiveIndexType: IndexType;
+   maxActiveRecords: nat;
+   maxArchivePages: nat;
+   maxRecordsInArchiveInstance: nat;
+   maxRecordsToArchive: nat;
+   settleToRecords: nat;
+   supportedBlocks: vec BlockType;
+ };
+type IndexType = 
+ variant {
+   Managed;
+   Stable;
+   StableTyped;
+ };
+type GetTransactionsResult = 
+ record {
+   archived_blocks: vec ArchivedTransactionResponse;
+   blocks: vec record {
+                 block: Value;
+                 id: nat;
+               };
+   log_length: nat;
+ };
+type GetTransactionsResponse = 
+ record {
+   archived_transactions: vec LegacyArchivedRange;
+   first_index: nat;
+   log_length: nat;
+   transactions: vec Transaction;
+ };
+type GetTransactionsFn = func (vec TransactionRange) ->
+                          (GetTransactionsResult) query;
+type GetLegacyArchiveTransactionFunction = func (GetBlocksRequest) ->
+                                            (GetArchiveTransactionsResponse) query;
+type GetBlocksResult = 
+ record {
+   archived_blocks: vec ArchivedTransactionResponse;
+   blocks: vec record {
+                 block: Value;
+                 id: nat;
+               };
+   log_length: nat;
+ };
+type GetBlocksRequest = 
+ record {
+   length: nat;
+   start: nat;
+ };
+type GetBlocksArgs = vec TransactionRange;
+type GetArchivesResultItem = 
+ record {
+   canister_id: principal;
+   end: nat;
+   start: nat;
+ };
+type GetArchivesResult = vec GetArchivesResultItem;
+type GetArchivesArgs = record {from: opt principal;};
+type GetArchiveTransactionsResponse = record {transactions: vec Transaction;};
+type DataCertificate = 
+ record {
+   certificate: blob;
+   hash_tree: blob;
+ };
+type Burn = 
+ record {
+   amount: nat;
+   created_at_time: opt nat64;
+   from: Account;
+   memo: opt blob;
+   spender: opt Account;
+ };
+type BlockType = 
+ record {
+   block_type: text;
+   url: text;
+ };
+type ArchivedTransactionResponse = 
+ record {
+   args: vec TransactionRange;
+   callback: GetTransactionsFn;
+ };
+type Approve = 
+ record {
+   amount: nat;
+   created_at_time: opt nat64;
+   expected_allowance: opt nat;
+   expires_at: opt nat64;
+   fee: opt nat;
+   from: Account;
+   memo: opt blob;
+   spender: Account;
+ };
+type Account = 
+ record {
+   owner: principal;
+   subaccount: opt blob;
+ };
+service : (init_args: opt InitArgs) -> InterfaceTestToken

@@ -1,0 +1,32 @@
+{
+    "version": 1,
+    "canisters": {
+        "token": {
+          "type": "motoko",
+          "main": "../../example/main.mo",
+          "args": "-v --incremental-gc"
+        },
+        "icrc_token": {
+          "type": "pull",
+          "id": "mxzaz-hqaaa-aaaar-qaada-cai"
+        },
+        "index": {
+          "type": "custom",
+          "wasm": "./ic-icrc1-index-ng.wasm.gz",
+          "candid": "./index-ng.did",
+          "init_arg": "(opt variant { Init = record { ledger_id = principal \"LEDGER_ID_PLACEHOLDER\" } })"
+        }
+    },
+    "defaults": {
+        "build": {
+            "packtool": "mops sources",
+            "args": ""
+        }
+    },
+    "networks": {
+        "local": {
+            "bind": "127.0.0.1:4943",
+            "type": "ephemeral"
+        }
+    }
+}

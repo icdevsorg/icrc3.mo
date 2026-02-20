@@ -1,0 +1,46 @@
+{
+    "canisters": {
+ 
+        "icrc3": {
+            "main": "example/main.mo",
+            "type": "motoko",
+            "gzip": true
+        },
+        "archive": {
+          "main": "src/archive/lib.mo",
+          "type": "motoko",
+          "gzip": true
+        },
+        "test_runner": {
+          "main": "testActor/test_runner.mo",
+          "type": "motoko",
+          "gzip": true
+        },
+        "collector": {
+          "main": "pic/collector.mo",
+          "type": "motoko"
+        },
+        "icrc3_ovs_test_v1": {
+          "main": "pic/ICRC3OVSTestCanisterV1.mo",
+          "type": "motoko"
+        },
+        "icrc3_ovs_test_v2": {
+          "main": "pic/ICRC3OVSTestCanisterV2.mo",
+          "type": "motoko"
+        },
+        "icrc3-interface-test": {
+          "main": "testActor/InterfaceTest.mo",
+          "type": "motoko"
+        }
+    },
+    "defaults": {
+        "build": {
+            "args": "",
+            "packtool": "mops sources"
+        },
+        "replica": {
+            "subnet_type": "application"
+        }
+    },
+    "version": 1
+}

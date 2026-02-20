@@ -1,0 +1,27 @@
+[package]
+name = "icrc3-mo"
+version = "0.4.0"
+description = "icrc3 for motoko"
+repository = "https://github.com/icdevsorg/icrc3.mo"
+keywords = [ "ledger", "transactions", "log", "icrc3", "certification" ]
+license = "MIT"
+
+[dependencies]
+core = "2.0.0"
+sha2 = "0.1.12"
+rep-indy-hash = "0.2.0"
+class-plus = "0.2.0"
+ic-certification = "1.1.0"
+stable-write-only = "0.2.0"
+leb128 = "1.1.0"
+ovs-fixed = "0.2.0"
+timer-tool = "0.2.0"
+
+[dev-dependencies]
+test = "2.1.2"
+fuzz = "0.2.0"
+bench = "2.0.1"
+matchers = "https://github.com/kritzcreek/motoko-matchers#v1.3.0@3dac8a071b69e4e651b25a7d9683fe831eb7cffd"
+
+[toolchain]
+moc = "1.1.0"

@@ -1,0 +1,104 @@
+CHANGELOG
+
+v0.4.0
+
+### Code Quality
+- Probable breaking changes
+- Fixed 8 unguarded `Debug.print` statements in `get_tip_certificate()` - now guarded with `debug if(debug_channel.certificate)`
+- Fixed unused identifier warnings across all source files:
+  - `archive/lib.mo`: Removed unused imports (Int, Time, Timer), removed redundant stable keyword
+  - `example/main.mo`: Removed unused imports and prefixed unused parameters
+  - `testActor/InterfaceTest.mo`: Removed unused imports and prefixed unused functions
+  - `pic/ICRC3OVSTestCanisterV1.mo` & `V2.mo`: Fixed unused variable warnings
+  - `testActor/test_runner.mo`: Replaced deprecated `ExperimentalCycles.add<system>` with `(with cycles = N)` syntax, prefixed 40+ unused variables
+  - updated to core, sha2, leb128
+
+### Mixin Enhancements
+- Added `icrc3_get_stats()` query function to mixin.mo for consistency with ICRC-2/4
+
+### Documentation
+- Complete README rewrite with:
+  - Comprehensive API Reference section
+  - Complete type documentation (Value, Transaction, BlockType, Stats, DataCertificate)
+  - Interface Hooks documentation with usage examples
+  - Security Considerations section
+  - Migration Guide (v0.1.x → v0.2.x → v0.3.x)
+  - Archive Configuration best practices
+  - Transaction Log sizing guidelines
+
+v0.3.7
+
+### Core Library Migration
+- **BREAKING:** Migrated from mo:base/mo:map/mo:vector to mo:core library
+- Uses mo:core/Map (B-tree based) instead of mo:map/Map (hash based)
+- Uses mo:core/List instead of mo:vector
+- Uses mo:core/Set instead of mo:map/Set
+
+### New Migration
+- Added v0_2_0 migration version with mo:core data structures
+- Automatic migration from v0_1_0 state
+
+### Public API Changes
+- Exports `CoreMap`, `CoreSet`, `CoreList` modules for external use
+- Exports `principal_compare` function for B-tree map operations
+- Hash configs replaced with compare functions
+
+### Dependencies
+- Replaced `base = "0.14.14"` with `core = "2.0.0"`
+- Removed `map = "9.0.1"` dependency
+- Removed `vector = "0.4.1"` dependency
+- Toolchain updated to `moc = "1.1.0"`
+
+v0.3.6
+
+### Bug Fixes
+- **CRITICAL:** Fixed certificate encoding for `last_block_index` - was using big-endian encoding instead of LEB128 as required by ICRC-3 specification. This fix ensures certificate verification works correctly with IC verification.
+
+### Changes
+- Replaced custom `encodeLEB128()` implementation with `mo:leb128` library (v1.1.0)
+- Added comprehensive ICRC-3 compliance test suite (34 tests)
+
+### Dependencies
+- Added `leb128 = "1.1.0"` dependency
+
+### Testing
+- Added `/test/icrc3.compliance.test.mo` with tests for:
+  - LEB128 encoding (including DFINITY test vectors)
+  - Block schema validation (tx.op and btype)
+  - Certificate structure validation
+  - Value type variants
+  - API response formats
+  - Account encoding
+
+v0.3.5
+
+- remove logs
+- fix first_index on legacy transactions
+
+v0.3.4
+
+- fix missing fees in legacy transactions
+
+v0.3.3
+
+- handle archive signature for legacy transactions
+
+v0.3.2
+
+- Faster SHA2
+- Upgraded moc and base used.
+- Added Legacy transaction helper that will convert ICRC3 transactions into Legacy Blocks returned by SNS Ledgers.  If the block is not supported the kind will be `unknown` and all items will be null.
+- Fixed off by one return amount in archive canisters
+- Added a helper to upgrade the existing archive canisters.
+
+v0.3.1
+
+- Mops updates
+- Fixed bug where too many items were being returned.
+
+v0.3.0
+
+- Added the ClassPlus instantiation pattern.
+- See https://mops.one/class-plus
+- Breaking change: You will need to reconfigure your instantiation and the way you pull your environment, but will not need to migrate your state variable as it has the same structure.
+- Update mops versions
