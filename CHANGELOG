@@ -1,6 +1,10 @@
 CHANGELOG
+v0.4.1
 
+- optimize icrc3_get_blocks
+- general clean up of unused imports
 v0.4.0
+- made archives a query
 
 ### Code Quality
 - Probable breaking changes
