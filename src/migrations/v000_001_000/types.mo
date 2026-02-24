@@ -14,7 +14,6 @@ import CertTreeLib "mo:ic-certification/CertTree";
 
 module {
 
-  //public let CandyTypes = CandyTypesLib;
   public let CertTree = CertTreeLib;
 
   public type Value = { 

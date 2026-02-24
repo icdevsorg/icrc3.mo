@@ -171,10 +171,8 @@ module {
 
   public func Init(config : InitFunctionArgs) : ()-> ICRC3{
     
-    //Debug.print("Subscriber Init");
     switch(config.pullEnvironment){
       case(?_val) {
-        //Debug.print("pull environment has value");
         
       };
       case(null) {
@@ -319,7 +317,6 @@ module {
     public func add_record<system>(new_record: Transaction, top_level: ?Value) : Nat {
 
       //validate that the trx has an op field according to ICRC3
-      //let ?type_id = helper.get_item_from_map("op", top_level) else Runtime.trap("missing the op field");
 
       debug if(debug_channel.add_record) Debug.print("adding a record" # debug_show(new_record));
 
@@ -398,9 +395,7 @@ module {
           let ct = CertTree.Ops(gcs());
           ct.put([Text.encodeUtf8("last_block_index")], encodeLEB128(state.lastIndex));
           ct.put([Text.encodeUtf8("last_block_hash")], latest_hash);
-          //Debug.print("DEBUG icrc3 - treeHash BEFORE setCertifiedData: " # debug_show(ct.treeHash()));
           ct.setCertifiedData();
-          //Debug.print("DEBUG icrc3 - treeHash AFTER setCertifiedData: " # debug_show(ct.treeHash()));
         };
         case(_){};
       };
@@ -744,7 +739,7 @@ module {
           let capacity = if(state.constants.archiveProperties.maxRecordsInArchiveInstance >= lastArchive.1.length){
             Nat.sub(state.constants.archiveProperties.maxRecordsInArchiveInstance,  lastArchive.1.length);
           } else {
-            Runtime.trap("max archive lenghth must be larger than the last archive length");
+            Runtime.trap("max archive length must be larger than the last archive length");
           };
 
           (lastArchive, capacity);
@@ -756,7 +751,7 @@ module {
       var archive_amount = if(List.size(state.ledger) > state.constants.archiveProperties.settleToRecords){
         Nat.sub(List.size(state.ledger), state.constants.archiveProperties.settleToRecords)
       } else {
-        Runtime.trap("Settle to records must be equal or smaller than the size of the ledger upon clanup");
+        Runtime.trap("Settle to records must be equal or smaller than the size of the ledger upon cleanup");
       };
 
       debug if(debug_channel.clean_up) Debug.print("amount to archive is " # debug_show(archive_amount));

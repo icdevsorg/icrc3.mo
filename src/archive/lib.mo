@@ -391,7 +391,7 @@ shared ({ caller = ledger_canister_id }) persistent actor class Archive (_args :
         assert (accepted == amount);
     };
 
-    /// Get the remaining cylces on the server
+    /// Get the remaining cycles on the server
     public query func cycles() : async Nat {
         ExperimentalCycles.balance();
     };
