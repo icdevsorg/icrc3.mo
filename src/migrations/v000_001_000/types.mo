@@ -7,12 +7,7 @@
 // you should also avoid importing these types anywhere in your project directly from here
 // use MigrationTypes.Current property instead
 
-import Region "mo:core/Region";
-import Array "mo:core/Array";
 import List "mo:core/List";
-import Nat "mo:core/Nat";
-import Nat32 "mo:core/Nat32";
-import D "mo:core/Debug";
 import SW "mo:stable-write-only";
 import Map "mo:core/Map";
 import CertTreeLib "mo:ic-certification/CertTree";

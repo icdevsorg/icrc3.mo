@@ -19,11 +19,8 @@ import ExperimentalCycles "mo:core/Cycles";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import Timer "mo:core/Timer";
-import Nat8 "mo:core/Nat8";
 import Nat "mo:core/Nat";
 import Nat64 "mo:core/Nat64";
-import Int "mo:core/Int";
-import Time "mo:core/Time";
 import Text "mo:core/Text";
 import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
@@ -34,7 +31,6 @@ import RepIndy "mo:rep-indy-hash";
 import HelperLib "helper";
 import OVSFixed "mo:ovs-fixed";
 import TT "mo:timer-tool";
-import Star "mo:star/star";
 
 import MTree "mo:ic-certification/MerkleTree";
 import Service "service";
@@ -72,18 +68,6 @@ module {
 
   /// Compare function for Principal keys in maps
   public let principal_compare = MigrationTypes.Current.principal_compare;
-
-  func range(start: Nat, end : Nat) : Iter.Iter<Nat> {
-    var i = start;
-    {
-      next = func() : ?Nat {
-        if (i > end) return null;
-        let val = i;
-        i += 1;
-        ?val
-      }
-    }
-  };
 
   /// Re-export ICRC-85 types for consumers
   public type ICRC85State = MigrationTypes.Current.ICRC85State;
@@ -827,8 +811,9 @@ module {
           start = archive_detail.1.start;
           length = archive_detail.1.length + archivedAmount;
         })
-      } catch (_){
-        //what do we do when it fails?  keep them in memory?
+      } catch (e){
+        //archiving failed — log the error but keep records in memory
+        debug if(debug_channel.clean_up) Debug.print("check_clean_up: archiving failed: " # Error.message(e));
         state.bCleaning :=false;
         return;
       };
@@ -841,11 +826,6 @@ module {
 
       debug if(debug_channel.clean_up) Debug.print("Checking clean up" # debug_show(stats()));
       return;
-    };
-
-    type TransactionTypes = {
-      id: Nat;
-      transaction: Transaction;
     };
 
     /// Returns the statistics of the migration
@@ -964,7 +944,7 @@ module {
           debug if(debug_channel.get_transactions) Debug.print("getting local transactions" # debug_show(start,end));
           //some of the items are on this server
           if(List.size(state.ledger) > 0 and start <= end){
-            label search for(thisItem in range(start, end)){
+            label search for(thisItem in HelperLib.range(start, end)){
               debug if(debug_channel.get_transactions) Debug.print("testing" # debug_show(thisItem));
               if(thisItem >= List.size(state.ledger)){
                 break search;
@@ -1047,14 +1027,14 @@ module {
     ///
     /// Returns:
     /// - The result of getting transactions
-    public func get_blocks(args: Service.GetBlocksArgs) : Service.GetBlocksResult {
+    public func get_blocks(args: GetBlocksArgs) : GetBlocksResult {
       let coreResult = get_blocks_core(args);
       
       //build the result
       return {
         log_length = coreResult.ledger_length;
         blocks = List.toArray(coreResult.blocks);
-        archived_blocks = Iter.toArray<Service.ArchivedBlock>(Iter.map<(Principal, List.List<TransactionRange>), Service.ArchivedBlock>(Map.entries(coreResult.archives), func(x :(Principal, List.List<TransactionRange>)):  Service.ArchivedBlock{
+        archived_blocks = Iter.toArray<MigrationTypes.Current.ArchivedTransactionResponse>(Iter.map<(Principal, List.List<TransactionRange>), MigrationTypes.Current.ArchivedTransactionResponse>(Map.entries(coreResult.archives), func(x :(Principal, List.List<TransactionRange>)):  MigrationTypes.Current.ArchivedTransactionResponse{
           {
             args = List.toArray(x.1);
             callback = (actor(Principal.toText(x.0)) : MigrationTypes.Current.ICRC3Interface).icrc3_get_blocks;

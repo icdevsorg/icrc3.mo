@@ -4,6 +4,8 @@ import Nat64 "mo:core/Nat64";
 
 module {
 
+  private func anonPrincipal() : Principal { Principal.fromText("2vxsx-fae") };
+
   public type Account = { owner : Principal; subaccount : ?Blob };
   public type Approve = {
     fee : ?Nat;
@@ -294,49 +296,8 @@ module {
 
   private func extractAccount(txMap: [(Text, Value)], field: Text) : Account {
     switch (getMapValue(txMap, field)) {
-      case (?#Array(arr)) {
-        switch (arr.size()) {
-          case (1) {
-            switch (arr[0]) {
-              case (#Blob(ownerBlob)) {
-                {
-                  owner = Principal.fromBlob(ownerBlob);
-                  subaccount = null;
-                };
-              };
-              case (_) {
-                {
-                  owner = Principal.fromText("2vxsx-fae");
-                  subaccount = null;
-                };
-              };
-            };
-          };
-          case (2) {
-            let owner = switch (arr[0]) {
-              case (#Blob(ownerBlob)) Principal.fromBlob(ownerBlob);
-              case (_) Principal.fromText("2vxsx-fae");
-            };
-            let subaccount = switch (arr[1]) {
-              case (#Blob(subBlob)) ?subBlob;
-              case (_) null;
-            };
-            { owner = owner; subaccount = subaccount };
-          };
-          case (_) {
-            {
-              owner = Principal.fromText("2vxsx-fae");
-              subaccount = null;
-            };
-          };
-        };
-      };
-      case (_) {
-        {
-          owner = Principal.fromText("2vxsx-fae");
-          subaccount = null;
-        };
-      };
+      case (?value) extractAccountFromValue(value);
+      case (null) ({ owner = anonPrincipal(); subaccount = null });
     };
   };
 
@@ -361,7 +322,7 @@ module {
               };
               case (_) {
                 {
-                  owner = Principal.fromText("2vxsx-fae");
+                  owner = anonPrincipal();
                   subaccount = null;
                 };
               };
@@ -370,7 +331,7 @@ module {
           case (2) {
             let owner = switch (arr[0]) {
               case (#Blob(ownerBlob)) Principal.fromBlob(ownerBlob);
-              case (_) Principal.fromText("2vxsx-fae");
+              case (_) anonPrincipal();
             };
             let subaccount = switch (arr[1]) {
               case (#Blob(subBlob)) ?subBlob;
@@ -380,7 +341,7 @@ module {
           };
           case (_) {
             {
-              owner = Principal.fromText("2vxsx-fae");
+              owner = anonPrincipal();
               subaccount = null;
             };
           };
@@ -388,7 +349,7 @@ module {
       };
       case (_) {
         {
-          owner = Principal.fromText("2vxsx-fae");
+          owner = anonPrincipal();
           subaccount = null;
         };
       };

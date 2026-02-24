@@ -1,12 +1,6 @@
 import ICRC3 ".";
-import MigrationTypes "migrations/types";
-import Service "service";
-import Array "mo:core/Array";
 import List "mo:core/List";
-import Principal "mo:core/Principal";
 import Legacy "legacy";
-import Debug "mo:core/Debug";
-import Runtime "mo:core/Runtime";
 
 module {
 
@@ -69,13 +63,7 @@ module {
   class DefaultImplementation(icrc3 : () -> ICRC3.ICRC3) {
 
     public func icrc3_get_blocks(ctx : QueryContext<ICRC3.GetBlocksArgs>) : ICRC3.GetBlocksResult {
-      let res = icrc3().get_blocks(ctx.args);
-      let blob = to_candid(res);
-      let decoded : ?ICRC3.GetBlocksResult = from_candid(blob);
-      switch(decoded) {
-          case(?v) v;
-          case(null) Runtime.trap("Cast failed via candid");
-      }
+      icrc3().get_blocks(ctx.args)
     };
 
     public func icrc3_get_archives(ctx : QueryContext<ICRC3.GetArchivesArgs>) : ICRC3.GetArchivesResult {

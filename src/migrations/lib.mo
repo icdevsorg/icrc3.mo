@@ -1,5 +1,4 @@
 import MigrationTypes "./types";
-import v0_0_0 "./v000_000_000";
 import v0_1_0 "./v000_001_000";
 import v0_2_0 "./v000_002_000";
 import D "mo:core/Debug";

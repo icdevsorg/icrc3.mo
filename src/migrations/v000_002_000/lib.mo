@@ -1,8 +1,6 @@
 import MigrationTypes "../types";
-import v0_1_0 "../v000_001_000/types";
 import v0_2_0 "types";
 
-import Principal "mo:core/Principal";
 import Map "mo:core/Map";
 import List "mo:core/List";
 

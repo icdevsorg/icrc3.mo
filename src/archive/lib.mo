@@ -7,27 +7,15 @@ import Runtime "mo:core/Runtime";
 import Nat "mo:core/Nat";
 import Nat64 "mo:core/Nat64";
 import TT "mo:timer-tool";
-import Iter "mo:core/Iter";
 import Prim "mo:⛔";
 import Legacy = "../legacy";
 import OVSFixed "mo:ovs-fixed";
 import ClassPlusLib "mo:class-plus";
 import Principal "mo:core/Principal";
 import Inspect "../Inspect";
+import HelperLib "../helper";
 
 shared ({ caller = ledger_canister_id }) persistent actor class Archive (_args : T.Current.ArchiveInitArgs) = this {
-
-    private func range(start: Nat, end : Nat) : Iter.Iter<Nat> {
-      var i = start;
-      {
-        next = func() : ?Nat {
-          if (i > end) return null;
-          let val = i;
-          i += 1;
-          ?val
-        }
-      }
-    };
 
     //==========================================================================
     // Message Inspection - Cycle Drain Protection
@@ -205,100 +193,6 @@ shared ({ caller = ledger_canister_id }) persistent actor class Archive (_args :
           org_icdevs_ovs_fixed_state := _state;
         };
     });
-/*
-    // Track if ICRC-85 timer has been initialized
-    stable var icrc85TimerScheduled = false;
-
-    // =====================================
-    // ICRC-85 Functions (defined first for use in append_transactions)
-    // =====================================
-
-    /// Calculate cycles to share based on ICRC-85 formula for archives
-    /// Formula: Base 1 XDR + 1 XDR per 1,000,000 records stored, capped at 100 XDR
-    func calculate_cycles_to_share() : (cycles: Nat, actions: Nat) {
-      let actions = if(icrc85State.activeActions > 0){
-        icrc85State.activeActions;
-      } else { 1 };
-
-      // Base: 1 XDR per month (~1T cycles)
-      var cyclesToShare = ONE_XDR_OF_CYCLES;
-
-      // +1 XDR per 1,000,000 records (archives store a lot more data)
-      if(actions > 0){
-        let additional = Nat.div(actions, 1_000_000);
-        cyclesToShare := cyclesToShare + (additional * ONE_XDR_OF_CYCLES);
-        
-        // Cap at 100 XDR
-        if(cyclesToShare > 100 * ONE_XDR_OF_CYCLES) {
-          cyclesToShare := 100 * ONE_XDR_OF_CYCLES;
-        };
-      };
-
-      (cyclesToShare, actions);
-    };
-
-    /// Share cycles with the OVS collector
-    func share_cycles() : async* () {
-      debug if(debug_channel.icrc85) Debug.print("Archive: in share_cycles");
-
-      let (cyclesToShare, actions) = calculate_cycles_to_share();
-      
-      debug if(debug_channel.icrc85) Debug.print("Archive: actions=" # debug_show(actions) # ", cycles=" # debug_show(cyclesToShare));
-
-      // Reset actions counter before sharing
-      icrc85State.activeActions := 0;
-
-      // Build ICRC-85 environment from init args
-      // Archive doesn't use ClassPlus, so we create a minimal environment
-      let icrc85Env : OVSFixed.Environment = {
-        var org_icdevs_class_plus_manager = null;
-        var org_icdevs_timer_tool = null;
-        var collector = _args.icrc85Collector;
-        advanced = ?{
-          kill_switch = ?false;
-          handler = null;
-          tree = null;
-        };
-      };
-
-      try {
-        await* OVSFixed.shareCycles<system>({
-          environment = icrc85Env;
-          namespace = ICRC85_NAMESPACE;
-          actions = actions;
-          schedule = func<system>(_period: Nat) : async* () {
-            // Schedule next share
-            ignore Timer.setTimer<system>(#nanoseconds(SHARING_PERIOD), func() : async () {
-              await* share_cycles();
-            });
-          };
-          cycles = cyclesToShare;
-          period = ?SHARING_PERIOD;
-          asset = ?"cycles";
-          platform = ?"icp";
-        });
-        icrc85State.lastActionReported := ?Int.abs(Time.now());
-      } catch(e){
-        // Restore actions on error - will retry next period
-        icrc85State.activeActions := actions;
-        debug if(debug_channel.icrc85) Debug.print("Archive: error sharing cycles: " # Error.message(e));
-        // Schedule retry
-        ignore Timer.setTimer<system>(#nanoseconds(SHARING_PERIOD), func() : async () {
-          await* share_cycles();
-        });
-      };
-    };
-
-    // Auto-initialize timer on first append_transactions if not already scheduled
-    private func ensureTimerScheduled<system>() {
-      if (not icrc85TimerScheduled) {
-        icrc85TimerScheduled := true;
-        ignore Timer.setTimer<system>(#nanoseconds(GRACE_PERIOD), func() : async () {
-          await* share_cycles();
-        });
-      };
-    };
-    */
 
     // =====================================
     // Main Archive Functions
@@ -311,9 +205,6 @@ shared ({ caller = ledger_canister_id }) persistent actor class Archive (_args :
       if (caller != ledger_canister_id) {
           return #err("Unauthorized Access: Only the ledger canister can access this archive canister");
       };
-
-      // Ensure ICRC-85 timer is scheduled on first append
-      //ensureTimerScheduled<system>();
 
       var recordsAdded = 0;
       label addrecs for(thisItem in txs.vals()){
@@ -359,7 +250,7 @@ shared ({ caller = ledger_canister_id }) persistent actor class Archive (_args :
         };
         let results = List.empty<Legacy.Transaction>();
         if(args.length == 0) return { transactions = [] };
-        for(thisItem in range(args.start, args.start + args.length - 1)){
+        for(thisItem in HelperLib.range(args.start, args.start + args.length - 1)){
             switch(_get_transaction(thisItem)){
                 case(null){
                     //should be unreachable...do we return an error?
@@ -402,7 +293,7 @@ shared ({ caller = ledger_canister_id }) persistent actor class Archive (_args :
         };
         let results = List.empty<Transaction>();
         if(args.length == 0) return { blocks = [] };
-        for(thisItem in range(args.start, args.start + args.length - 1)){
+        for(thisItem in HelperLib.range(args.start, args.start + args.length - 1)){
             switch(_get_transaction(thisItem)){
                 case(null){
                     // Block not found - skip
@@ -443,7 +334,7 @@ shared ({ caller = ledger_canister_id }) persistent actor class Archive (_args :
           // Calculate the end index (exclusive)
           let endIndex = thisArg.start + thisArg.length;
           if (thisArg.length > 0) {
-            for(thisItem in range(thisArg.start, endIndex - 1)){
+            for(thisItem in HelperLib.range(thisArg.start, endIndex - 1)){
               debug if(debug_channel.get) Debug.print("getting" # debug_show(thisItem));
               switch(_get_transaction(thisItem)){
                 case(null){

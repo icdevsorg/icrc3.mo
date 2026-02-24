@@ -1,5 +1,4 @@
 import Archive "./archive";
-import Text "mo:core/Text";
 import Result "mo:core/Result";
 import List "mo:core/List";
 import Error "mo:core/Error";

@@ -32,10 +32,8 @@
 /////////
 
 import ICRC3 ".";
-import Principal "mo:core/Principal";
 import Legacy "legacy";
 import List "mo:core/List";
-import ClassPlus "mo:class-plus";
 import Interface "./Interface";
 import Inspect "./Inspect";
 
@@ -144,7 +142,7 @@ mixin(
   };
 
   // Legacy archives endpoint for Rosetta compatibility
-  public shared func archives() : async [{ canister_id: Principal; block_range_start: Nat; block_range_end: Nat }] {
+  public query func archives() : async [{ canister_id: Principal; block_range_start: Nat; block_range_end: Nat }] {
     let icrc3Archives = icrc3().get_archives({ from = null });
     let buffer = List.empty<{ canister_id: Principal; block_range_start: Nat; block_range_end: Nat }>();
     for (archive in icrc3Archives.vals()) {

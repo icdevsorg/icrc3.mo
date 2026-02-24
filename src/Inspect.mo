@@ -10,7 +10,6 @@
 /// Reference: https://motoko-book.dev/advanced-concepts/system-apis/message-inspection.html
 
 import Nat "mo:core/Nat";
-import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 
 module {
