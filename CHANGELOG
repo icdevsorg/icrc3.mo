@@ -1,10 +1,16 @@
 CHANGELOG
+v0.4.2
+
+### Bug Fix
+- Fixed archive OVS `actionMultiplier` from `1_000_000_000` to `1_000_000` — was 1000x too high, now correctly computes to 1 extra XDR per 1,000,000 records stored as intended by the code comment
+
 v0.4.1
 
 - optimize icrc3_get_blocks
 - general clean up of unused imports
-v0.4.0
 - made archives a query
+
+v0.4.0
 
 ### Code Quality
 - Probable breaking changes
